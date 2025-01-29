@@ -8,6 +8,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -46,11 +47,11 @@ public class MovieController {
     }
 
     @GetMapping("/movies/search")
-    public ResponseEntity<Movie> getMovieByTitle(@RequestParam String title) {
-        Optional<Movie> foundMovie = movies.stream()
+    public ResponseEntity<List<Movie>> getMovieByTitle(@RequestParam String title) {
+        List<Movie> foundMovie = movies.stream()
                 .filter((movie) -> movie.getTitle().contains(title))
-                .findFirst();
+                .toList();
 
-        return foundMovie.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return ResponseEntity.ok(foundMovie);
     }
 }
