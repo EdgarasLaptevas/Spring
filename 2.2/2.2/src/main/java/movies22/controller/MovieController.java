@@ -54,4 +54,41 @@ public class MovieController {
 
         return ResponseEntity.ok(foundMovie);
     }
+
+    @PutMapping("movies/{index}")
+    public ResponseEntity<Movie> updateBook(@PathVariable int index, @RequestBody Movie movie) {
+
+        if (movie.getTitle() == null || movie.getDirector() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (movie.getTitle().isEmpty() || movie.getDirector().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        if (index <= movies.size() - 1) {
+            movies.get(index).setTitle(movie.getTitle());
+            movies.get(index).setId(movie.getId());
+            movies.get(index).setDirector(movie.getDirector());
+        }
+
+        movies.add(movie);
+
+        return ResponseEntity.created(
+                        ServletUriComponentsBuilder.fromCurrentRequest()
+                                .path("/{index}")
+                                .buildAndExpand(movies.size() - 1)
+                                .toUri())
+                .body(movie);
+    }
+
+    @DeleteMapping("/movies/{index}")
+    public ResponseEntity<Void> deleteBook(@PathVariable int index) {
+        if (index > movies.size() - 1) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        movies.remove(index);
+
+        return ResponseEntity.noContent().build();
+    }
 }
