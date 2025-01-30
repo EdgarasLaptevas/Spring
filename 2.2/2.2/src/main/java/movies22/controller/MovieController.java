@@ -43,6 +43,7 @@ public class MovieController {
         if (index > movies.size() - 1) {
             return ResponseEntity.notFound().build();
         }
+        
         return ResponseEntity.ok(movies.get(index));
     }
 
@@ -86,7 +87,7 @@ public class MovieController {
         if (index > movies.size() - 1) {
             return ResponseEntity.notFound().build();
         }
-        
+
         movies.remove(index);
 
         return ResponseEntity.noContent().build();
