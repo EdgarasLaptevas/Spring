@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -15,12 +16,7 @@ public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public long id;
-
-    @NotNull
-    @Size(min = 2, max = 120)
     public String title;
-
-    @Pattern(regexp = "^[A-Z][a-z]+$", message = "Must start whit UpperCase")
     public String author;
     public String category;
     public BigDecimal price;
@@ -31,7 +27,7 @@ public class Book {
     @JoinColumn(name = "book_id")
     private List<Review> reviews;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "book_categories",
             joinColumns = @JoinColumn(name = "book_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")

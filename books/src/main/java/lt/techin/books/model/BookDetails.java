@@ -13,8 +13,7 @@ public class BookDetails {
     private int pageCount;
     private String language;
 
-    public BookDetails(long id, String isbn, int pageCount, String language) {
-        this.id = id;
+    public BookDetails(String isbn, int pageCount, String language) {
         this.isbn = isbn;
         this.pageCount = pageCount;
         this.language = language;

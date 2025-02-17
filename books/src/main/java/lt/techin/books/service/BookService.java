@@ -2,6 +2,7 @@ package lt.techin.books.service;
 
 import lt.techin.books.model.Book;
 import lt.techin.books.repository.BookRepository;
+import lt.techin.books.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -53,4 +54,5 @@ public class BookService {
         return bookRepository.findAll(pageable);
 
     }
+    
 }

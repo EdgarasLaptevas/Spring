@@ -11,8 +11,7 @@ public class Review {
     private long id;
     private String comment;
 
-    public Review(long id, String comment) {
-        this.id = id;
+    public Review(String comment) {
         this.comment = comment;
     }
 
@@ -23,7 +22,7 @@ public class Review {
     public long getId() {
         return id;
     }
-    
+
     public String getComment() {
         return comment;
     }

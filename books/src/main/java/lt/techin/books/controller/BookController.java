@@ -1,6 +1,10 @@
 package lt.techin.books.controller;
 
 import jakarta.validation.Valid;
+import lt.techin.books.dto.BookDTO;
+import lt.techin.books.dto.BookMapper;
+import lt.techin.books.dto.BookMapperReturn;
+import lt.techin.books.dto.BookTDOReturn;
 import lt.techin.books.model.Book;
 import lt.techin.books.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,31 +33,31 @@ public class BookController {
     }
 
     @GetMapping("/books")
-    public ResponseEntity<List<Book>> findBooks() {
-        return ResponseEntity.ok(bookService.findAllBooks());
+    public ResponseEntity<List<BookDTO>> findBooks() {
+        return ResponseEntity.ok(BookMapper.toBookDTOList(bookService.findAllBooks()));
     }
 
     @GetMapping("/books/{id}")
-    public ResponseEntity<Book> findBook(@PathVariable long id) {
+    public ResponseEntity<BookDTO> findBook(@PathVariable long id) {
 
         Optional<Book> foundBook = bookService.findBookById(id);
 
         if (foundBook.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(foundBook.get());
+        return ResponseEntity.ok(BookMapper.toBookDTO(foundBook.get()));
     }
 
     @PostMapping("/books")
-    public ResponseEntity<Book> postBook(@Valid @RequestBody Book book) {
-        System.out.println("POST request received");
-        Book postedBook = bookService.saveBook(book);
+    public ResponseEntity<BookTDOReturn> postBook(@Valid @RequestBody BookDTO bookDTO) {
+
+        Book postedBook = bookService.saveBook(BookMapper.toBook(bookDTO));
 
         return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest()
                         .path("/{id}")
                         .buildAndExpand(postedBook.getId())
                         .toUri())
-                .body(postedBook);
+                .body(BookMapperReturn.toBookTDOReturn(postedBook));
     }
 
     @DeleteMapping("/books/{id}")
@@ -66,52 +70,52 @@ public class BookController {
     }
 
     @PutMapping("/books/{id}")
-    public ResponseEntity<?> putBook(@Valid @PathVariable long id, @RequestBody Book book) {
-        if (book.getTitle().isEmpty() || book.getAuthor().isEmpty()) {
+    public ResponseEntity<?> putBook(@PathVariable long id, @Valid @RequestBody BookDTO bookDTO) {
+        if (bookDTO.title().isEmpty() || bookDTO.author().isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("book author or book title not found");
         }
         if (bookService.existById(id)) {
             Book bookFromDB = bookService.findBookById(id).get();
-            bookFromDB.setAuthor(book.getAuthor());
-            bookFromDB.setTitle(book.getTitle());
-            bookFromDB.setCategory(book.getCategory());
-            bookFromDB.setPrice(book.getPrice());
-            bookFromDB.setCover(book.getCover());
-            bookFromDB.setReviews(book.getReviews());
-            bookFromDB.setCategory(book.getCategory());
-            bookFromDB.setBookDetails(book.getBookDetails());
-            return ResponseEntity.ok(bookService.saveBook(bookFromDB));
+
+            BookMapper.updateBookFromBookTDO(bookFromDB, bookDTO);
+            
+
+            return ResponseEntity.ok(BookMapper.toBookDTO(bookService.saveBook(bookFromDB)));
         }
 
-        Book savedBook = bookService.saveBook(book);
+        Book savedBook = bookService.saveBook(BookMapper.toBook(bookDTO));
 
         return ResponseEntity.created(
                         ServletUriComponentsBuilder.fromCurrentRequest()
                                 .replacePath("/api/books/{id}")
                                 .buildAndExpand(savedBook.getId())
                                 .toUri())
-                .body(savedBook);
+                .body(BookMapper.toBookDTO(savedBook));
     }
 
     @PatchMapping("/books/{id}")
-    public ResponseEntity<?> patchBook(@PathVariable long id, @RequestBody Book book) {
-//        if (book.getTitle().isEmpty() || book.getAuthor().isEmpty()) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("book author or book title not found");
-//        }
+    public ResponseEntity<?> patchBook(@PathVariable long id, @RequestBody BookDTO bookDTO) {
 
         Book bookFromDB = bookService.findBookById(id).get();
 
-        bookFromDB.setReserved(book.isReserved());
-        return ResponseEntity.ok(bookService.saveBook(bookFromDB));
+        bookFromDB.setReserved(bookDTO.reserved());
+        bookService.saveBook(bookFromDB);
+
+        return ResponseEntity.ok(bookDTO);
+
 
     }
 
     //Pagination
     @GetMapping("/books/pagination")
-    public ResponseEntity<Page<Book>> getBooksPage(@RequestParam int page,
-                                                   @RequestParam int size,
-                                                   @RequestParam(required = false) String sort) {
-        return ResponseEntity.ok(bookService.findAllBooksPage(page, size, sort));
+    public ResponseEntity<Page<BookDTO>> getBooksPage(@RequestParam int page,
+                                                      @RequestParam int size,
+                                                      @RequestParam(required = false) String sort) {
+
+
+        return ResponseEntity.ok(BookMapper.convertToDTOPage(bookService.findAllBooksPage(page, size, sort)));
 
     }
+
+
 }
